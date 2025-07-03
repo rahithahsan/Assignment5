@@ -11,6 +11,15 @@ class User
         $this->db = db_connect();                      // PDO singleton
     }
 
+    /* ──────- password policy (kept STATIC so we can call User::passwordMeetsPolicy) */
+    public static function passwordMeetsPolicy(string $p): bool
+    {
+        return strlen($p) >= 8               // ≥ 8 chars
+            && preg_match('/[A-Z]/', $p)     // upper
+            && preg_match('/[a-z]/', $p)     // lower
+            && preg_match('/\d/', $p)        // digit
+            && preg_match('/[^A-Za-z0-9]/', $p); // special
+    }
     /* ────────── Registration ────────── */
     public function register(string $u, string $p, int $adminFlag = 0): void
     {

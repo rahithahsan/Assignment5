@@ -1,10 +1,11 @@
 <?php
 /* ────────── Auth gate ────────── */
 if (!isset($_SESSION['auth'])) {
-    header('Location: /login'); exit;
+    header('Location: /login');
+    exit;
 }
 
-/* admin helper comes from the session (set at login) */
+/* Flag set in Login::verify() */
 $isAdmin = !empty($_SESSION['is_admin']);
 ?>
 <!DOCTYPE html>
@@ -14,20 +15,18 @@ $isAdmin = !empty($_SESSION['is_admin']);
   <title>COSC 4806 – Dashboard</title>
 
   <!-- Bootstrap 5.3 & Feather icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://unpkg.com/feather-icons" defer></script>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" href="/favicon.png">
 </head>
 
 <body class="d-flex flex-column min-vh-100">
 
-<!-- ====== NAVBAR (private area) ====== -->
+<!-- ========= NAVBAR (private area) ========= -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
   <div class="container-fluid">
-
     <a class="navbar-brand fw-semibold" href="/home">COSC 4806</a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -48,7 +47,7 @@ $isAdmin = !empty($_SESSION['is_admin']);
           <li class="nav-item"><a class="nav-link" href="/reports">Reports</a></li>
         <?php endif; ?>
 
-        <!-- help dropdown -->
+        <!-- Help dropdown ---------------------------------------------------->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
@@ -64,10 +63,14 @@ $isAdmin = !empty($_SESSION['is_admin']);
         </li>
       </ul>
 
-      <!-- right-hand: user + logout ---------------------------------------->
-      <span class="navbar-text text-white small me-3">
-        <?= htmlspecialchars($_SESSION['username'] ?? '') ?>
+      <!-- right-hand: user / badge / logout --------------------------------->
+      <span class="navbar-text text-white small me-3 d-flex align-items-center gap-2">
+        <?= htmlspecialchars($_SESSION['username']) ?>
+        <?php if ($isAdmin): ?>
+          <span class="badge bg-warning text-dark">ADMIN</span>
+        <?php endif; ?>
       </span>
+
       <a href="/logout" class="btn btn-sm btn-light">Log&nbsp;out</a>
     </div>
   </div>

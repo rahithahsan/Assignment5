@@ -1,5 +1,4 @@
 <?php
-
 class Login extends Controller
 {
     public function index(): void
@@ -14,23 +13,22 @@ class Login extends Controller
 
         $user = $this->model('User');
 
+        /* rate-limit */
         if ($user->lockedOut($u)) {
             $_SESSION['flash'] = 'Too many failed attempts – try again in 60 s.';
             header('Location: /login'); exit;
         }
 
-        $row = $user->authenticate($u, $p);   // now an array or null
-
-        if ($uid = $user->authenticate($u, $p)) {   // authenticate now returns id
+        /* attempt login */
+        if ($uid = $user->authenticate($u, $p)) {
             $_SESSION['auth']     = 1;
-            $_SESSION['uid']      = $uid;           // ← NEW: save user id for Notes
-            $_SESSION['username'] = ucwords($u);
+            $_SESSION['username'] = ucwords($u);   // pretty display name
             header('Location: /home'); exit;
         }
 
-        /* failure */
+        /* failure path */
         $_SESSION['flash'] = 'Invalid credentials.';
         header('Location: /login'); exit;
     }
-
 }
+
