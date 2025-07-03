@@ -83,4 +83,14 @@ class User
             ->prepare("INSERT INTO log(username, outcome) VALUES (?, ?)")
             ->execute([strtolower($u), $out]);
     }
+    public function loginCounts(): array
+    {
+        $sql = "SELECT username, COUNT(*) AS cnt
+                  FROM log
+                 WHERE outcome = 'good'
+              GROUP BY username
+              ORDER BY cnt DESC";
+        $rows = $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        return array_column($rows, 'cnt', 'username');
+    }
 }
