@@ -9,9 +9,8 @@
 
     <nav class="d-flex gap-3">
       <a class="link-secondary text-decoration-none" href="/about">About</a>
-      <a class="link-secondary text-decoration-none" href="/menu/login-info">Docs</a>
-      <a class="link-secondary text-decoration-none"
-         href="mailto:mikebio@gmail.com">Contact</a>
+      <a class="link-secondary text-decoration-none" href="/pages/docs">Docs</a>
+      <a class="link-secondary text-decoration-none" href="/pages/contact">Contact</a>
     </nav>
   </div>
 </footer>
