@@ -1,36 +1,36 @@
 <?php
-
+/**
+ * User model  – handles registration, login, lock-out + audit log
+ */
 class User
 {
     private PDO $db;
 
     public function __construct()
     {
-        $this->db = db_connect();
+        $this->db = db_connect();                      // PDO singleton
     }
 
-    /* ---------- password policy ---------- */
-    public static function passwordMeetsPolicy(string $p): bool
+    /* ────────── Registration ────────── */
+    public function register(string $u, string $p, int $adminFlag = 0): void
     {
-        return strlen($p) >= 8
-            && preg_match('/[A-Z]/', $p)
-            && preg_match('/[a-z]/', $p)
-            && preg_match('/\d/',    $p)
-            && preg_match('/[^A-Za-z0-9]/', $p);
+        $sql = "INSERT INTO users (username, password_hash, is_admin)
+                VALUES (?, ?, ?)";
+        $this->db->prepare($sql)->execute([
+            strtolower($u),
+            password_hash($p, PASSWORD_DEFAULT),
+            $adminFlag
+        ]);
     }
 
-    /* ---------- registration ---------- */
-    public function register(string $u, string $p): void
-    {
-        $sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
-        $this->db->prepare($sql)
-                 ->execute([strtolower($u), password_hash($p, PASSWORD_DEFAULT)]);
-    }
-    /** ---------- authentication ---------- */
-    public function authenticate(string $u, string $p): ?int   // ← return user id
+    /* ────────── Authentication ────────── */
+    /** @return int|null  user’s PK on success, null otherwise */
+    public function authenticate(string $u, string $p): ?int
     {
         $stmt = $this->db->prepare(
-            "SELECT * FROM users WHERE username = ?"
+            "SELECT id, password_hash, is_admin
+               FROM users
+              WHERE username = ?"
         );
         $stmt->execute([strtolower($u)]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -38,36 +38,40 @@ class User
         $ok = $row && password_verify($p, $row['password_hash']);
         $this->logAttempt($u, $ok ? 'good' : 'bad');
 
-        return $ok ? (int)$row['id'] : null;   // user’s PK on success, null otherwise
+        if ($ok) {
+            /* store extras for the session */
+            $_SESSION['uid']      = (int)$row['id'];
+            $_SESSION['is_admin'] = (bool)$row['is_admin'];
+            return (int)$row['id'];
+        }
+        return null;
     }
 
-    /* ---------- lock-out (3 bad in 60 s) ---------- */
+    /* ────────── 3 bad attempts → 60 s lock-out ────────── */
     public function lockedOut(string $u): bool
     {
-        $stmt = $this->db->prepare(
-            "SELECT outcome, created_at
-               FROM log
-              WHERE username = ?
-           ORDER BY id DESC
-              LIMIT 3"
-        );
+        $q = "SELECT outcome, created_at
+                FROM log
+               WHERE username = ?
+            ORDER BY id DESC
+               LIMIT 3";
+        $stmt = $this->db->prepare($q);
         $stmt->execute([strtolower($u)]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);   // ← stmt object
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (count($rows) < 3) return false;
 
-        $allBad   = array_reduce($rows,
-                     fn($c,$r)=>$c && $r['outcome']==='bad', true);
+        $allBad   = array_reduce($rows, fn($c,$r)=>$c && $r['outcome']==='bad', true);
         $within60 = time() - strtotime($rows[0]['created_at']) < 60;
 
         return $allBad && $within60;
     }
 
-    /* ---------- private helper ---------- */
-    private function logAttempt(string $u,string $out): void
+    /* ────────── helpers ────────── */
+    private function logAttempt(string $u, string $out): void
     {
         $this->db
-            ->prepare("INSERT INTO log(username,outcome) VALUES(?,?)")
+            ->prepare("INSERT INTO log(username, outcome) VALUES (?, ?)")
             ->execute([strtolower($u), $out]);
     }
 }
