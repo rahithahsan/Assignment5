@@ -1,4 +1,9 @@
-<?php require 'app/views/templates/headerPublic.php'; ?>
+<?php
+/* docs.php  (same for contact.php) */
+require_once isset($_SESSION['auth'])
+        ? 'app/views/templates/header.php'        // private navbar
+        : 'app/views/templates/headerPublic.php'; // public navbar
+?>
 <main class="container py-5">
 
   <div class="row justify-content-center">
