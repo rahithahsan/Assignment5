@@ -91,4 +91,28 @@ class Note
         // call the new archive so behaviour is consistent everywhere
         $this->archive($id, $uid);
     }
+    /* ════════════ ADMIN QUERIES ════════════ */
+
+    /** Every reminder from every user (for the table on /reports) */
+    public function allForAdmin(): array
+    {
+        $sql = "SELECT n.*, u.username
+                  FROM notes n
+             JOIN users u ON u.id = n.user_id
+              ORDER BY n.created_at DESC";
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /** The user who owns the most reminders */
+    public function mostActiveUser(): ?array
+    {
+        $sql = "SELECT u.username, COUNT(*) AS cnt
+                  FROM notes n
+             JOIN users u ON u.id = n.user_id
+              GROUP BY user_id
+              ORDER BY cnt DESC
+                 LIMIT 1";
+        return $this->db->query($sql)->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
 }
