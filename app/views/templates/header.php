@@ -52,8 +52,8 @@ $isAdmin = ($_SESSION['username'] ?? '') === 'admin';
             Help
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/menu/login-info">Login flow</a></li>
-            <li><a class="dropdown-item" href="/menu/register-info">Register flow</a></li>
+            <li><a class="dropdown-item" href="/menu/loginInfo">Login flow</a></li>
+            <li><a class="dropdown-item" href="/menu/registerInfo">Register flow</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="https://algomau.ca/" target="_blank">
               Algoma U</a></li>
