@@ -41,9 +41,42 @@
     </div>
   </div>
 
-  <!-- full reminders table -->
+  <!-- Login totals table ════════════════ -->
+  <div class="card shadow-sm mx-auto" style="max-width:420px">
+    <div class="card-header d-flex align-items-center gap-1">
+      <i data-feather="hash"></i>
+      <span class="fw-semibold">Login totals</span>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-sm mb-0 text-center">
+        <thead class="table-light">
+          <tr><th class="w-50">User</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+          <?php foreach ($loginCnts as $u => $c): ?>
+            <tr>
+              <td><?= htmlspecialchars($u) ?></td>
+              <td class="fw-semibold"><?= $c ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- ═══════════ 3.  All reminders (filterable) ══════════════════════ -->
+  <h5 class="fw-semibold mb-2 mt-4"><i data-feather="list"></i> All reminders</h5>
+
+  <!-- status pill-filter -->
+  <ul class="nav nav-pills mb-2" id="statusFilter">
+    <li class="nav-item"><button class="nav-link active" data-status="all">All</button></li>
+    <li class="nav-item"><button class="nav-link"           data-status="open">Open</button></li>
+    <li class="nav-item"><button class="nav-link"           data-status="done">Done</button></li>
+    <li class="nav-item"><button class="nav-link"           data-status="archived">Archived</button></li>
+  </ul>
+
   <div class="table-responsive mb-5">
-    <table class="table table-sm table-hover align-middle">
+    <table class="table table-sm table-hover align-middle" id="remTbl">
       <thead class="table-light">
         <tr>
           <th>User</th>
@@ -54,13 +87,13 @@
       </thead>
       <tbody>
       <?php foreach ($all as $r): ?>
-        <tr>
+        <?php
+          $status = $r['deleted'] ? 'archived' : ($r['completed'] ? 'done' : 'open');
+        ?>
+        <tr data-status="<?= $status ?>">
           <td><?= htmlspecialchars($r['username']) ?></td>
           <td><?= htmlspecialchars($r['subject']) ?></td>
-          <td>
-            <?= $r['deleted'] ? 'Archived'
-                 : ($r['completed'] ? 'Done' : 'Open') ?>
-          </td>
+          <td class="text-capitalize"><?= $status ?></td>
           <td><?= date('Y-m-d H:i', strtotime($r['created_at'])) ?></td>
         </tr>
       <?php endforeach; ?>
@@ -91,13 +124,25 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /* feather icons */
+  window.feather && feather.replace();
 
-<!-- optional: raw numbers table ----------------------------------->
-<h6 class="mt-4 mb-2"><i data-feather="hash"></i> Login totals</h6>
-<table class="table table-sm w-auto">
-  <?php foreach ($loginCnts as $u => $c): ?>
-    <tr><td><?= htmlspecialchars($u) ?></td><td><?= $c ?></td></tr>
-  <?php endforeach; ?>
-</table>
+  /* status filter */
+  const filterBar = document.getElementById('statusFilter');
+  const rows      = document.querySelectorAll('#remTbl tbody tr');
+
+  filterBar.addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON') return;
+    filterBar.querySelectorAll('.nav-link').forEach(a=>a.classList.remove('active'));
+    e.target.classList.add('active');
+    const f = e.target.dataset.status;
+    rows.forEach(r=>{
+      r.style.display = (f==='all' || r.dataset.status===f) ? '' : 'none';
+    });
+  });
+});
+</script>
 
 <?php require 'app/views/templates/footer.php'; ?>
