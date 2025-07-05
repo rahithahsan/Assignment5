@@ -1,6 +1,6 @@
 # COSC 4806 – Assignment 5: Reminders + Admin Reports (MVC PHP) - Rahith Ahsan
 
-> **Repo & live Replit**: add the links here before submission → `https://github.com/rahithahsan/Assignment4`  |  `https://replit.com/@rahsan2/Assignment4#README.md`
+> **Repo & live Replit**: add the links here before submission → `https://github.com/rahithahsan/Assignment5`  |  `https://replit.com/@rahsan2/Assignment5#README.md`
 >
 > **Default credentials for marking**  
 > *username*: `rahith`  |  *password*: `Test123!`
