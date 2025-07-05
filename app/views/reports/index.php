@@ -19,7 +19,7 @@
     <div class="col-md">
       <div class="card text-center shadow-sm">
         <div class="card-body">
-          <h6 class="card-title text-muted small">Top user</h6>
+          <h6 class="card-title text-muted small">User with the Most Reminders</h6>
           <?php if ($topUser): ?>
             <p class="fw-semibold mb-0"><?= htmlspecialchars($topUser['username']) ?></p>
             <span class="text-muted small"><?= $topUser['cnt'] ?> reminders</span>
@@ -91,5 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+
+<!-- optional: raw numbers table ----------------------------------->
+<h6 class="mt-4 mb-2"><i data-feather="hash"></i> Login totals</h6>
+<table class="table table-sm w-auto">
+  <?php foreach ($loginCnts as $u => $c): ?>
+    <tr><td><?= htmlspecialchars($u) ?></td><td><?= $c ?></td></tr>
+  <?php endforeach; ?>
+</table>
 
 <?php require 'app/views/templates/footer.php'; ?>
