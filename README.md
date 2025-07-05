@@ -1,20 +1,21 @@
-# COSC 4806 – Assignment 4: Notes CRUD App (MVC PHP) - Rahith Ahsan
+# COSC 4806 – Assignment 5: Reminders + Admin Reports (MVC PHP) - Rahith Ahsan
 
 > **Repo & live Replit**: add the links here before submission → `https://github.com/rahithahsan/Assignment4`  |  `https://replit.com/@rahsan2/Assignment4#README.md`
 >
 > **Default credentials for marking**  
 > *username*: `rahith`  |  *password*: `Test123!`
+> *admin*: `admin`  |  *password*: `admin`
 
 ---
 
 ## 1  Project Summary
-Building on Assignment 3’s secure login system, **Assignment 4 adds a full Create‑Read‑Update‑Delete (CRUD) workflow for personal reminders**.  A logged‑in user can:
+Building on Assignment 3’s secure login system, **Assignment 4 adds a full Create‑Read‑Update‑Delete (CRUD) workflow for personal reminders**.  Assignment 5 builds on both evolving the Assignment‑4 CRUD app into a mini SaaS dashboard: A logged‑in user can:
 
-* create a reminder (subject + optional body)
-* see open vs. completed lists
-* mark any reminder *Done* / *Undo* with a single click (AJAX‑free)
-* edit the text or completion flag
-* archive (delete) a reminder – hidden from lists but preserved in DB for audit
+* refreshed public / private headers & footer (two navbars)
+* Bootstrap components sprinkled throughout – Toast flash, alert banners, progress‑bar, pill filters, accordion FAQ
+* Admin role (new is_admin flag) with a protected /reports area
+* live KPIs, who owns the most reminders, per‑user login totals, Chart.js bar chart
+* strict ACL: non‑admin & guests are 403‑blocked
 
 All functionality follows the MVC pattern and every database query uses prepared PDO statements.
 
@@ -32,79 +33,58 @@ All functionality follows the MVC pattern and every database query uses prepared
 
 ## 3  Database Schema
 ```sql
--- users table unchanged from A3
-CREATE TABLE users (
-  id            INT AUTO_INCREMENT PRIMARY KEY,
-  username      VARCHAR(100) UNIQUE NOT NULL,
-  password_hash CHAR(60)       NOT NULL,
-  created_at    TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
-);
+-- A5: add admin flag
+ALTER TABLE users
+  ADD COLUMN is_admin TINYINT(1) NOT NULL DEFAULT 0
+  AFTER password_hash;
 
--- NEW notes table (A4)
-CREATE TABLE notes (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  user_id    INT          NOT NULL REFERENCES users(id),
-  subject    VARCHAR(255) NOT NULL,
-  body       TEXT,
-  completed  TINYINT      DEFAULT 0,   -- 0=open 1=done
-  deleted    TINYINT      DEFAULT 0,   -- 0=visible 1=archived
-  created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
-);
+-- seed built‑in administrator
+INSERT INTO users (username, password_hash, is_admin)
+VALUES ('admin', '$2y$10$Lry5vkTHvHnKTf/tulwsouPk..(hash)…', 1);
 ```
-
+Notes table is unchanged from Assignment 4.
 ---
 
 ## 4  Requirement Checklist (A4)
 | Requirement | 🚀 Implementation |
 |-------------|------------------|
-| **CRUD on `notes` table** | `Note` model exposes `insert()`, `open()`, `done()`, `find()`, `update()`, `toggle()`, `archive()`; called from `Notes` controller |
-| **Min 3 columns** | `id`, `user_id`, `subject` (+ `body`, `completed`, `deleted`, `created_at`) |
-| **Header link** | “**My Reminders**” nav item added in `templates/header.php` |
-| **Unique views** | `notes/index.php` (dash with collapsible completed list), `create.php`, `edit.php` – all custom styled, no boiler‑plate |
-| **User‑friendly update/delete** | *Done*, *Undo*, *Edit*, *Del* buttons with tool‑tips & colour cues; one‑click toggle avoids extra page load |
-| **All PDO** | every query via `$this->db->prepare()` + bound params; no raw SQL strings interpolated |
-| **≥ 20 commits** | see `git log --oneline` – 35 A4 commits, each atomic (model, controller, UI, footer fix, etc.) |
-| **Shared Replit & GitHub** | repo & Replit invite sent to *mikebio@gmail.com* with full edit rights |
+| **Headers & footers revamped** | New navbars (`header.php`, `headerPublic.php`) & glossy footer with icons |
+| **Bootstrap components** | Toast flash `(templates/header*.php)`, alerts, card grid, progress‑bar, pill filters, accordion in Docs page |
+| **Admin user** | Seeder SQL above; `User::authenticate()` now exposes `is_admin` in session |
+| **/reports controller** | `Reports@index` aggregates stats & loads `views/reports/index.php` |
+| **View all reminders** | Big filterable table (`data‑status` + JS pills) |
+| **Top user** | `Note::mostActiveUser()` + KPI card |
+| **Login totals** | `User::loginCounts()` – chart + mini table |
+| **Chart bonus** | Chart.js bar chart of successful logins |
+| **Admin menu item** | `Reports` link shows only when `$_SESSION['is_admin']=1` |
+| **ACL** | Middleware inside `Reports` controller sends `403` if not admin |
+| **PDO everywhere** | same pledge as A4 – prepared statements only |
+| **Polished UI** | Dark‑primary navbar, shadow cards, responsive gutter, feather icons |
 
 ---
 
-## 5  How to Test (marker’s guide)
-1. **Log in** with the demo credentials above.  
-2. Click **My Reminders** → you’ll land on `/notes`.
-3. Press **New** → fill *Subject* + (optional) *Details* → *Save reminder*.<br>✔️ Flash banner confirms *Reminder created!*; item appears in *To do* list.
-4. Press **Done** – row moves to *Completed* section and counter badge increments.
-5. Expand *Completed* (blue link) → press **Undo** to return it to *To do*.
-6. Press **Edit** → change text or tick *Mark as completed* → *Save changes* → list updates accordingly.
-7. Press **Del** on a completed row – record disappears from UI (flag `deleted=1`).
-8. Verify with SQL console: `SELECT * FROM notes WHERE deleted=1;` – row still stored for audit.
+## 5 Demo / Marking Guide
+### 5.1  Regular user
+* Log in as rahith/Test123! → land on redesigned Home (Toast greets you).
+* Create a couple reminders, mark some Done, archive, etc. – all A4 flows still intact.
+### 5.2  Administrator
+* Log in as admin/admin.
+* Navbar now shows Reports. Click it → /reports.
+* KPI cards show Total reminders & User with most reminders.
+* Bar chart Logins per user renders (Chart.js). Hover bars for counts.
+* Click pill filters (Open, Done, Archived) above the All‑Reminders table – rows hide/show instantly (Bootstrap pills + JS).
+* Try hitting /reports in another browser not logged in → expects 403 Forbidden.
 
 ---
 
-## 6  Internal Flow
-```mermaid
-sequenceDiagram
-    autonumber
-    participant U as User (browser)
-    participant C as Notes Controller
-    participant M as Note Model
-    participant DB as MariaDB
+## 6 Bootstrap 5 Components Used
 
-    U->>C: GET /notes
-    C->>M: open(uid) & done(uid)
-    M->>DB: SELECT … completed=0 / 1
-    DB-->>M: result sets
-    M-->>C: arrays
-    C->>U: render index view
-
-    U->>C: POST /notes/store (subject,body)
-    C->>M: insert(uid,sub,body)
-    M->>DB: INSERT INTO notes …
-    C-->>U: redirect /notes (flash)
-
-    U->>C: GET /notes/toggle/{id}
-    C->>M: toggle(id,uid)
-    M->>DB: UPDATE completed=1-completed
-    C-->>U: redirect /notes
-```
+* Toast – session flash on login/create/update
+* Alerts – success / danger banners everywhere
+* Cards – KPI and Docs grids
+* Progress – open vs done bar on Home dashboard
+* Nav pills + JS filter – status selector in Reports table
+* Accordion – FAQ section in Docs
+* Badge – ADMIN badge beside username
 
 ---
