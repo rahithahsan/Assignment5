@@ -4,18 +4,27 @@ class Home extends Controller
 {
     public function index(): void
     {
+        /* ── Auth gate ── */
         if (!isset($_SESSION['auth'])) {
-            header('Location:/login');
-            exit;
+            header('Location:/login'); exit;
         }
 
-        /* ── NEW: gentle nudge if user still has open reminders ── */
-        $open = $this->model('Note')->open($_SESSION['uid']);   // array
-        if ($open) {
-            $_SESSION['toast'] =
-              "You have " . count($open) . " open reminder(s) – don’t forget!";
+        /* gather quick stats for the dashboard toast / progress */
+        $note = $this->model('Note');
+        $uid  = $_SESSION['uid'];
+
+        $open  = $note->open($uid);
+        $done  = $note->done($uid);
+
+        /* optional flash if user has nothing pending */
+        if (empty($open) && !empty($done)) {
+            $_SESSION['flash'] = 'Nice job – all reminders completed!';
         }
 
-        $this->view('home/index');
+        /* pass counts to the view */
+        $this->view('home/index', [
+            'openCount' => count($open),
+            'doneCount' => count($done)
+        ]);
     }
 }
