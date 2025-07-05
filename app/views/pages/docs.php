@@ -140,8 +140,7 @@ php -S localhost:8000 -t public
 
 </main>
 
-<!-- page-specific scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   window.feather && feather.replace();
