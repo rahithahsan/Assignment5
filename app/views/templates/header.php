@@ -28,7 +28,7 @@ unset($_SESSION['toast']);
 <body class="d-flex flex-column min-vh-100">
 
 <!-- ========= NAVBAR (private area) ========= -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm position-relative" style="z-index: 1100;">
   <div class="container-fluid">
     <a class="navbar-brand fw-semibold" href="/home">COSC 4806</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -46,8 +46,8 @@ unset($_SESSION['toast']);
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">Help</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/docs">Docs</a></li>
-            <li><a class="dropdown-item" href="/contact">Contact</a></li>
+            <li><a class="dropdown-item" href="/pages/docs">Docs</a></li>
+            <li><a class="dropdown-item" href="/pages/contact">Contact</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="/menu/loginInfo">Login flow</a></li>
             <li><a class="dropdown-item" href="/menu/registerInfo">Register flow</a></li>
